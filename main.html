@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Selector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 100%;
+            padding: 15px;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        .recipient-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .recipient button {
+            margin: 10px 0;
+            width: 100%;
+            max-width: 250px;
+            height: 40px;
+            border-radius: 8px;
+        }
+        .mood-container {
+            width: 100%;
+        }
+        h1 {
+            color: #333;
+            font-size: 1.4rem;
+        }
+        .category, .tags {
+            margin: 15px 0;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: #f0f0f0;
+            color: #333;
+            cursor: pointer;
+            width: 100%;
+            max-width: 250px;
+            height: 40px;
+        }
+        button:hover {
+            background-color: #ddd;
+        }
+        button.selected {
+            background-color: #28a745;
+        }
+        .back-button {
+            background-color: #dc3545;
+            color: white;
+        }
+        .back-button:hover {
+            background-color: #b02a37;
+        }
+        .recipient.selected {
+            color: white;
+        }
+        #Solène.selected {
+            background-color: #007BFF;
+        }
+        #Meredith.selected {
+            background-color: #7f00ff;
+        }
+        .tags button.selected {
+            color: white;
+        }
+        #tags-section {
+            display: none;
+        }
+        .textarea-container {
+            margin: 15px 0;
+        }
+        textarea {
+            width: 100%;
+            max-width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.2rem;
+            }
+            button {
+                font-size: 1rem;
+            }
+        }
+    </style>
+    <script>
+        let selectedRecipient = '';
+        let selectedCategory = '';
+        const tagsByCategory = {
+            "Je me sens super": ["Énergique", "Heureux", "Optimiste", "Motivé", "Enthousiaste", "Ravi", "Satisfait", "Inspiré", "Confiant", "Vivifiant"],
+            "Je me sens bien": ["Calme", "Content", "Positif", "Serein", "Détendu", "Reconnaissant", "Équilibré", "Confortable", "Plaisant", "Réconforté"],
+            "Neutre": ["Rien à signaler", "Normal", "Stable", "Indifférent", "Inexpressif", "Plat", "Stoïque", "Habituel", "Sans émotion", "Moyen"],
+            "Pas très bien": ["Fatigué", "Stressé", "Préoccupé", "Émotif", "Irritable", "Confus", "Inquiet", "Pessimiste", "Dépassé", "Tendu"],
+            "Mal": ["Déprimé", "Anxieux", "En colère", "Triste", "Écrasé", "Vide", "Honteux", "Désespéré", "Isolé", "Vulnérable"]
+        };
+
+        function selectRecipient(name) {
+            if (selectedRecipient === name) {
+                selectedRecipient = '';
+                document.getElementById(name).classList.remove('selected');
+            } else {
+                if (selectedRecipient) {
+                    document.getElementById(selectedRecipient).classList.remove('selected');
+                }
+                selectedRecipient = name;
+                document.getElementById(name).classList.add('selected');
+            }
+        }
+
+        function selectCategory(category) {
+            selectedCategory = category;
+            showTags();
+        }
+
+        function showTags() {
+            document.getElementById('categories-section').style.display = 'none';
+            document.getElementById('tags-section').style.display = 'block';
+            const tagsContainer = document.querySelector('.tags');
+            tagsContainer.innerHTML = `<p>Choisissez un ou plusieurs mots pour décrire votre état :</p>`;
+            tagsByCategory[selectedCategory].forEach(tag => {
+                const button = document.createElement('button');
+                button.textContent = tag;
+                button.onclick = function () {
+                    toggleTag(button);
+                };
+                tagsContainer.appendChild(button);
+            });
+        }
+
+        function sendMessage() {
+            const tags = Array.from(document.querySelectorAll('.tags button.selected')).map(button => button.innerText);
+            const customMessage = document.getElementById('custom-message').value;
+            const recipientNumber = selectedRecipient === 'Solène' ? 'sms:0615641479' : (selectedRecipient === 'Meredith' ? 'sms:0612023783' : '');
+
+            if (!selectedRecipient) {
+                alert('Veuillez sélectionner une personne dans le menu à gauche.');
+                return;
+            }
+
+            const message = `Coucou,\nJe me sens : ${selectedCategory}.\n- ${tags.join('\n- ')}\n\n${customMessage ? customMessage + '\n\n' : ''}Bisous, ${selectedRecipient}`;
+            window.location.href = `${recipientNumber}?body=${encodeURIComponent(message)}`;
+        }
+
+        function toggleTag(button) {
+            button.classList.toggle('selected');
+        }
+
+        function goBack() {
+            document.getElementById('tags-section').style.display = 'none';
+            document.getElementById('categories-section').style.display = 'block';
+            document.querySelectorAll('.tags button.selected').forEach(button => button.classList.remove('selected'));
+        }
+    </script>
+</head>
+<body>
+    <div class="main-container">
+        <div class="container recipient-container">
+            <h2>Qui es-tu ?</h2>
+            <button id="Solène" class="recipient" onclick="selectRecipient('Solène')">Solène</button>
+            <button id="Meredith" class="recipient" onclick="selectRecipient('Meredith')">Meredith</button>
+        </div>
+
+        <div class="container mood-container">
+            <h1>Comment vous sentez-vous aujourd'hui ?</h1>
+
+            <div id="categories-section">
+                <div class="category">
+                    <p>Sélectionnez votre humeur :</p>
+                    <button onclick="selectCategory('Je me sens super')">Je me sens super</button>
+                    <button onclick="selectCategory('Je me sens bien')">Je me sens bien</button>
+                    <button onclick="selectCategory('Neutre')">Neutre</button>
+                    <button onclick="selectCategory('Pas très bien')">Pas très bien</button>
+                    <button onclick="selectCategory('Mal')">Mal</button>
+                </div>
+            </div>
+
+            <div id="tags-section">
+                <div class="tags"></div>
+                <div class="textarea-container">
+                    <textarea id="custom-message" placeholder="Quelque chose à dire ?"></textarea>
+                </div>
+                <button onclick="goBack()" class="back-button">Retour</button>
+                <button onclick="sendMessage()">Envoyer</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
